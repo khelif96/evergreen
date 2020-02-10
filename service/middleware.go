@@ -181,11 +181,14 @@ func (uis *UIServer) setCORSHeaders(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if len(uis.Settings.Ui.CORSOrigins) > 0 {
 			requester := r.Header.Get("Origin")
+			fmt.Println("REQUESTER")
+			fmt.Println(requester)
 
 			// Requests from a GQL client include this header, which must be added to the response to enable CORS
 			gqlHeader := r.Header.Get("Access-Control-Request-Headers")
 
-			if util.StringSliceContains(uis.Settings.Ui.CORSOrigins, requester) {
+			if util.StringSliceContains(uis.Settings.Ui.CORSOrigins, requester) || r.Method == "OPTIONS" {
+				fmt.Println("WE MADE IT")
 				w.Header().Add("Access-Control-Allow-Origin", requester)
 				w.Header().Add("Access-Control-Allow-Credentials", "true")
 				w.Header().Add("Access-Control-Allow-Headers", fmt.Sprintf("%s, %s, %s", evergreen.APIKeyHeader, evergreen.APIUserHeader, gqlHeader))
