@@ -31,6 +31,7 @@ func setupSmokeTest(err error) cli.BeforeFunc {
 	}
 }
 
+// delete this
 func startLocalEvergreen() cli.Command {
 	return cli.Command{
 		Name:  "start-local-evergreen",
@@ -51,6 +52,7 @@ func startLocalEvergreen() cli.Command {
 	}
 }
 
+// rename to startLocalEvergreen
 func smokeStartEvergreen() cli.Command {
 	const (
 		binaryFlagName       = "binary"

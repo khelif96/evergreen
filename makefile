@@ -98,9 +98,9 @@ $(buildDir)/set-project-var:cmd/set-project-var/set-project-var.go
 set-var:$(buildDir)/set-var
 set-project-var:$(buildDir)/set-project-var
 set-smoke-vars:$(buildDir)/.load-smoke-data
-	@./bin/set-project-var -dbName mci_smoke -key aws_key -value $(AWS_KEY)
-	@./bin/set-project-var -dbName mci_smoke -key aws_secret -value $(AWS_SECRET)
-	@./bin/set-var -dbName mci_smoke -collection hosts -id localhost -key agent_revision -value $(currentHash)
+	@./bin/set-project-var -dbName evergreen_local -key aws_key -value $(AWS_KEY)
+	@./bin/set-project-var -dbName evergreen_local -key aws_secret -value $(AWS_SECRET)
+	@./bin/set-var -dbName evergreen_local -collection hosts -id localhost -key agent_revision -value $(currentHash)
 load-smoke-data:$(buildDir)/.load-smoke-data
 load-local-data:$(buildDir)/.load-local-data
 $(buildDir)/.load-smoke-data:$(buildDir)/load-smoke-data
@@ -109,22 +109,32 @@ $(buildDir)/.load-smoke-data:$(buildDir)/load-smoke-data
 $(buildDir)/.load-local-data:$(buildDir)/load-smoke-data
 	./$< --path testdata/local --dbName evergreen_local
 	@touch $@
+
+# loads local data
 smoke-test-agent-monitor:$(localClientBinary) load-smoke-data
 	./$< service deploy start-evergreen --web --binary ./$< &
 	./$< service deploy start-evergreen --monitor --binary ./$< --client_url ${CLIENT_URL} &
 	./$< service deploy test-endpoints --check-build --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
 	pkill -f $<
+
+# loads smoke data
 smoke-test-task:$(localClientBinary) load-smoke-data
 	./$< service deploy start-evergreen --web --binary ./$< &
 	./$< service deploy start-evergreen --agent --binary ./$< &
 	./$< service deploy test-endpoints --check-build --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
 	pkill -f $<
+
+# loads local data
 smoke-test-endpoints:$(localClientBinary) load-smoke-data
 	./$< service deploy start-evergreen --web --binary ./$< &
 	./$< service deploy test-endpoints --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
 	pkill -f $<
+
+# loads local data
 local-evergreen:$(localClientBinary) load-local-data
 	./$< service deploy start-local-evergreen
+
+# delete this
 smoke-start-server:$(localClientBinary) load-smoke-data
 	./$< service deploy start-evergreen --web
 # end smoke test rules

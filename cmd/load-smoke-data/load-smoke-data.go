@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"github.com/mongodb/grip"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -46,7 +46,7 @@ func main() {
 	)
 
 	flag.StringVar(&path, "path", filepath.Join(wd, "testdata", "smoke"), "load data from json files from these paths")
-	flag.StringVar(&dbName, "dbName", "mci_smoke", "database name for directory")
+	flag.StringVar(&dbName, "dbName", "evergreen_local", "database name for directory")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())

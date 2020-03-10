@@ -21,7 +21,7 @@ func main() {
 		value      string
 	)
 
-	flag.StringVar(&dbName, "dbName", "mci_smoke", "database name for directory")
+	flag.StringVar(&dbName, "dbName", "evergreen_local", "database name for directory")
 	flag.StringVar(&collection, "collection", "", "name of collection")
 	flag.StringVar(&id, "id", "", "_id of document")
 	flag.StringVar(&key, "key", "", "key to set")
