@@ -45,7 +45,7 @@ func main() {
 		dbName string
 	)
 
-	flag.StringVar(&path, "path", filepath.Join(wd, "testdata", "smoke"), "load data from json files from these paths")
+	flag.StringVar(&path, "path", filepath.Join(wd, "testdata", "local"), "load data from json files from these paths")
 	flag.StringVar(&dbName, "dbName", "evergreen_local", "database name for directory")
 	flag.Parse()
 
