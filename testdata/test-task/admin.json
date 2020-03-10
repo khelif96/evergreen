@@ -1,0 +1,8 @@
+{ "_id" : "ui", "default_project" : "logkeeper", "url" : "localhost:9090", "http_listen_addr" : ":9090", "secret" : "secret for UI", "cors_origins": ["http://localhost:3000"] }
+{ "_id" : "auth",  "preferred_type": "naive", "naive" : { "users" : [ { "username" : "admin", "password" : "password", "display_name" : "Evergreen Admin" }, { "username" : "privileged", "password" : "password", "display_name" : "Privileged User" }, { "username" : "regular", "password" : "password", "display_name" : "Regular User" } ] } }
+{ "_id" : "global", "api_url" : "localhost:8080", "configdir" : "config_test", "domain_name" : "evergreen.local", "client_binaries_dir": "clients" }
+{ "_id" : "api", "github_webhook_secret": "test", "httplistenaddr": ":8080" }
+{ "_id" : "plugins", "perf": {"projects": ["sys-perf", "performance"]}, "buildbaron": {"host": "jira.example.com", "username": "foo", "password": "bar", "projects": {"logkeeper": {"ticket_create_project": "foo", "ticket_search_projects": ["foo"]}}} }
+{ "_id" : "providers", "aws": {"aws_id": "foo", "aws_secret": "bar"} }
+{ "_id" : "repotracker", "numnewreporevisionstofetch": 10, "maxreporevisionstosearch": 10 }
+{ "_id" : "notify", "logfile": "evg_notify.log" }
