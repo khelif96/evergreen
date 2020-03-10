@@ -104,12 +104,12 @@ set-smoke-vars:$(buildDir)/.load-smoke-data
 load-smoke-data:$(buildDir)/.load-smoke-data
 load-local-data:$(buildDir)/.load-local-data
 $(buildDir)/.load-smoke-data:$(buildDir)/load-smoke-data
-	./$<
+	./$< --path testdata/smoke --dbName evergreen_smoke
 	@touch $@
 $(buildDir)/.load-local-data:$(buildDir)/load-smoke-data
-	./$< --path testdata/smoke --dbName evergreen_local
+	./$<
 	@touch $@
-smoke-test-agent-monitor:$(localClientBinary) load-smoke-data
+smoke-test-agent-monitor:$(localClientBinary) load-local-data
 	./$< service deploy start-evergreen --web --binary ./$< &
 	./$< service deploy start-evergreen --monitor --binary ./$< --client_url ${CLIENT_URL} &
 	./$< service deploy test-endpoints --check-build --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
@@ -119,14 +119,12 @@ smoke-test-task:$(localClientBinary) load-smoke-data
 	./$< service deploy start-evergreen --agent --binary ./$< &
 	./$< service deploy test-endpoints --check-build --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
 	pkill -f $<
-smoke-test-endpoints:$(localClientBinary) load-smoke-data
+smoke-test-endpoints:$(localClientBinary) load-local-data
 	./$< service deploy start-evergreen --web --binary ./$< &
 	./$< service deploy test-endpoints --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
 	pkill -f $<
 local-evergreen:$(localClientBinary) load-local-data
-	./$< service deploy start-local-evergreen
-smoke-start-server:$(localClientBinary) load-smoke-data
-	./$< service deploy start-evergreen --web
+	./$< service deploy start-evergreen --web --binary ./$< &
 # end smoke test rules
 
 ######################################################################

@@ -33,9 +33,8 @@ func deploy() cli.Command {
 		Subcommands: []cli.Command{
 			deployMigration(),
 			deployDataTransforms(),
-			smokeStartEvergreen(),
-			smokeTestEndpoints(),
 			startLocalEvergreen(),
+			smokeTestEndpoints(),
 		},
 	}
 }
