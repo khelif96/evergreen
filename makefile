@@ -102,17 +102,21 @@ set-smoke-vars:$(buildDir)/.load-smoke-data
 	@./bin/set-project-var -dbName evergreen_local -key aws_secret -value $(AWS_SECRET)
 	@./bin/set-var -dbName evergreen_local -collection hosts -id localhost -key agent_revision -value $(currentHash)
 load-smoke-data:$(buildDir)/.load-smoke-data
+load-task-data:$(buildDir)/.load-task-data
 $(buildDir)/.load-smoke-data:$(buildDir)/load-smoke-data
 	./$<
+	@touch $@
+$(buildDir)/.load-task-data:$(buildDir)/load-smoke-data
+	./$< --path testdata/test-task --dbName test-task
 	@touch $@
 smoke-test-agent-monitor:$(localClientBinary) load-smoke-data
 	./$< service deploy start-evergreen --web --binary ./$< &
 	./$< service deploy start-evergreen --monitor --binary ./$< --client_url ${CLIENT_URL} &
 	./$< service deploy test-endpoints --check-build --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
 	pkill -f $<
-smoke-test-task:$(localClientBinary) load-smoke-data
-	./$< service deploy start-evergreen --web --binary ./$< &
-	./$< service deploy start-evergreen --agent --binary ./$< &
+smoke-test-task:$(localClientBinary) load-task-data
+	./$< service deploy start-evergreen --web --db test-task --binary ./$< &
+	./$< service deploy start-evergreen --agent --db test-task --binary ./$< &
 	./$< service deploy test-endpoints --check-build --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
 	pkill -f $<
 smoke-test-endpoints:$(localClientBinary) load-smoke-data
@@ -121,8 +125,8 @@ smoke-test-endpoints:$(localClientBinary) load-smoke-data
 	pkill -f $<
 local-evergreen:$(localClientBinary) load-smoke-data
 	./$< service deploy start-evergreen --web
-smoke-start-server:$(localClientBinary) load-smoke-data
-	./$< service deploy start-evergreen --web
+# smoke-start-server:$(localClientBinary) load-smoke-data
+# 	./$< service deploy start-evergreen --web
 # end smoke test rules
 
 ######################################################################
