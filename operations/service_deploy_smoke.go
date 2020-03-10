@@ -74,18 +74,18 @@ func smokeStartEvergreen() cli.Command {
 	wd, err := os.Getwd()
 
 	binary := filepath.Join(wd, "clients", runtime.GOOS+"_"+runtime.GOARCH, "evergreen")
-	confPath := filepath.Join(wd, "testdata", "smoke_config.yml")
+	// confPath := filepath.Join(wd, "testdata", "smoke_config.yml")
 
 	return cli.Command{
 		Name:    "start-evergreen",
 		Aliases: []string{},
 		Usage:   "start evergreen web service for smoke tests",
 		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:  confFlagName,
-				Usage: "path to the (test) service configuration file",
-				Value: confPath,
-			},
+			// cli.StringFlag{
+			// 	Name:  confFlagName,
+			// 	Usage: "path to the (test) service configuration file",
+			// 	Value: confPath,
+			// },
 			cli.StringFlag{
 				Name:  binaryFlagName,
 				Usage: "path to evergreen binary",
@@ -108,9 +108,9 @@ func smokeStartEvergreen() cli.Command {
 				Usage: "the URL of the client for the monitor to fetch",
 			},
 		},
-		Before: mergeBeforeFuncs(setupSmokeTest(err), requireFileExists(confFlagName), requireAtLeastOneBool(webFlagName, agentFlagName, agentMonitorFlagName)),
+		Before: mergeBeforeFuncs(setupSmokeTest(err), requireAtLeastOneBool(webFlagName, agentFlagName, agentMonitorFlagName)),
 		Action: func(c *cli.Context) error {
-			confPath := c.String(confFlagName)
+			// confPath := c.String(confFlagName)
 			binary := c.String(binaryFlagName)
 			startWeb := c.Bool(webFlagName)
 			startAgent := c.Bool(agentFlagName)
@@ -120,7 +120,7 @@ func smokeStartEvergreen() cli.Command {
 			exit := make(chan error, 3)
 
 			if startWeb {
-				if err := smokeRunBinary(exit, "web.service", wd, binary, "service", "web", "--conf", confPath); err != nil {
+				if err := smokeRunBinary(exit, "web.service", wd, binary, "service", "web", "--db", "mci_smoke"); err != nil {
 					return errors.Wrap(err, "error running web service")
 				}
 			}
