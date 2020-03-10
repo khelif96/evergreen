@@ -55,6 +55,7 @@ func startLocalEvergreen() cli.Command {
 // rename to startLocalEvergreen
 func smokeStartEvergreen() cli.Command {
 	const (
+		dbNameFlagName       = "dbName"
 		binaryFlagName       = "binary"
 		agentFlagName        = "agent"
 		webFlagName          = "web"
@@ -87,6 +88,10 @@ func smokeStartEvergreen() cli.Command {
 				Usage: "path to evergreen binary",
 				Value: binary,
 			},
+			cli.StringFlag{
+				Name:  dbNameFlagName,
+				Usage: "name of db to use",
+			},
 			cli.BoolFlag{
 				Name:  webFlagName,
 				Usage: "run the evergreen web service",
@@ -111,13 +116,20 @@ func smokeStartEvergreen() cli.Command {
 			startAgent := c.Bool(agentFlagName)
 			startAgentMonitor := c.Bool(agentMonitorFlagName)
 			clientURL := c.String(clientURLFlagName)
+			dbName := c.String(dbNameFlagName)
 
 			exit := make(chan error, 3)
 
 			if startWeb {
-				if err := smokeRunBinary(exit, "web.service", wd, binary, "service", "web", "--db", "evergreen_local"); err != nil {
+				db := "evergreen_local"
+				if dbName != "" {
+					db = dbName
+				}
+
+				if err := smokeRunBinary(exit, "web.service", wd, binary, "service", "web", "--db", db); err != nil {
 					return errors.Wrap(err, "error running web service")
 				}
+
 			}
 
 			if startAgent {
