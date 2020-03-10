@@ -53,6 +53,7 @@ func startLocalEvergreen() cli.Command {
 
 func smokeStartEvergreen() cli.Command {
 	const (
+		dbNameFlagName       = "dbName"
 		binaryFlagName       = "binary"
 		agentFlagName        = "agent"
 		webFlagName          = "web"
@@ -101,6 +102,10 @@ func smokeStartEvergreen() cli.Command {
 				Name:  clientURLFlagName,
 				Usage: "the URL of the client for the monitor to fetch",
 			},
+			cli.StringFlag{
+				Name:  dbNameFlagName,
+				Usage: "name of db to use",
+			},
 		},
 		Before: mergeBeforeFuncs(setupSmokeTest(err), requireAtLeastOneBool(webFlagName, agentFlagName, agentMonitorFlagName)),
 		Action: func(c *cli.Context) error {
@@ -109,11 +114,16 @@ func smokeStartEvergreen() cli.Command {
 			startAgent := c.Bool(agentFlagName)
 			startAgentMonitor := c.Bool(agentMonitorFlagName)
 			clientURL := c.String(clientURLFlagName)
+			dbName := c.String(dbNameFlagName)
 
 			exit := make(chan error, 3)
 
 			if startWeb {
-				if err := smokeRunBinary(exit, "web.service", wd, binary, "service", "web", "--db", "mci_smoke"); err != nil {
+				db := "mci_smoke"
+				if dbName != "" {
+					db = dbName
+				}
+				if err := smokeRunBinary(exit, "web.service", wd, binary, "service", "web", "--db", db); err != nil {
 					return errors.Wrap(err, "error running web service")
 				}
 			}
