@@ -123,8 +123,8 @@ smoke-test-endpoints:$(localClientBinary) load-smoke-data
 	./$< service deploy start-evergreen --web --binary ./$< &
 	./$< service deploy test-endpoints --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
 	pkill -f $<
-local-evergreen:$(localClientBinary) load-local-data
-	./$< service deploy start-local-evergreen
+local-evergreen:$(localClientBinary) load-smoke-data
+	./$< service deploy start-evergreen --web
 smoke-start-server:$(localClientBinary) load-smoke-data
 	./$< service deploy start-evergreen --web
 # end smoke test rules

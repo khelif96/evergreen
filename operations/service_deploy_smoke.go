@@ -74,18 +74,12 @@ func smokeStartEvergreen() cli.Command {
 	wd, err := os.Getwd()
 
 	binary := filepath.Join(wd, "clients", runtime.GOOS+"_"+runtime.GOARCH, "evergreen")
-	// confPath := filepath.Join(wd, "testdata", "smoke_config.yml")
 
 	return cli.Command{
 		Name:    "start-evergreen",
 		Aliases: []string{},
 		Usage:   "start evergreen web service for smoke tests",
 		Flags: []cli.Flag{
-			// cli.StringFlag{
-			// 	Name:  confFlagName,
-			// 	Usage: "path to the (test) service configuration file",
-			// 	Value: confPath,
-			// },
 			cli.StringFlag{
 				Name:  binaryFlagName,
 				Usage: "path to evergreen binary",
@@ -110,7 +104,6 @@ func smokeStartEvergreen() cli.Command {
 		},
 		Before: mergeBeforeFuncs(setupSmokeTest(err), requireAtLeastOneBool(webFlagName, agentFlagName, agentMonitorFlagName)),
 		Action: func(c *cli.Context) error {
-			// confPath := c.String(confFlagName)
 			binary := c.String(binaryFlagName)
 			startWeb := c.Bool(webFlagName)
 			startAgent := c.Bool(agentFlagName)
