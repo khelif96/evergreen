@@ -2,7 +2,7 @@ log_path: "server_logs.txt"
 
 database:
   url: "mongodb://localhost:27017"
-  db: "mci_smoke"
+  # db: "mci_smoke"
   write_concern:
     wmode: majority
 
