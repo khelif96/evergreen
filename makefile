@@ -115,8 +115,8 @@ smoke-test-agent-monitor:$(localClientBinary) load-smoke-data
 	./$< service deploy test-endpoints --check-build --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
 	pkill -f $<
 smoke-test-task:$(localClientBinary) load-task-data
-	./$< service deploy start-evergreen --web --db test-task --binary ./$< &
-	./$< service deploy start-evergreen --agent --db test-task --binary ./$< &
+	./$< service deploy start-evergreen --web --dbName test-task --binary ./$< &
+	./$< service deploy start-evergreen --agent --dbName test-task --binary ./$< &
 	./$< service deploy test-endpoints --check-build --username admin --key abb623665fdbf368a1db980dde6ee0f0 $(smokeFile) || (pkill -f $<; exit 1)
 	pkill -f $<
 smoke-test-endpoints:$(localClientBinary) load-smoke-data
