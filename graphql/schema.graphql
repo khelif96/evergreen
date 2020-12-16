@@ -22,6 +22,7 @@ type Query {
     baseStatuses: [String!] = []
     variant: String
     taskName: String
+    displayTasksOnly: Boolean = false
   ): PatchTasks!
   taskTests(
     taskId: String!
@@ -36,7 +37,7 @@ type Query {
   taskFiles(taskId: String!, execution: Int): TaskFiles!
   user(userId: String): User!
   taskLogs(taskId: String!): RecentTaskLogs!
-  patchBuildVariants(patchId: String!): [PatchBuildVariant!]!
+  patchBuildVariants(patchId: String!, displayTasksOnly: Boolean = false): [PatchBuildVariant!]!
   commitQueue(id: String!): CommitQueue!
   userSettings: UserSettings
   spruceConfig: SpruceConfig

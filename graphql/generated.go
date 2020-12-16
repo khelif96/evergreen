@@ -466,8 +466,8 @@ type ComplexityRoot struct {
 		MyPublicKeys            func(childComplexity int) int
 		MyVolumes               func(childComplexity int) int
 		Patch                   func(childComplexity int, id string) int
-		PatchBuildVariants      func(childComplexity int, patchID string) int
-		PatchTasks              func(childComplexity int, patchID string, sortBy *TaskSortCategory, sortDir *SortDirection, page *int, limit *int, statuses []string, baseStatuses []string, variant *string, taskName *string) int
+		PatchBuildVariants      func(childComplexity int, patchID string, displayTasksOnly *bool) int
+		PatchTasks              func(childComplexity int, patchID string, sortBy *TaskSortCategory, sortDir *SortDirection, page *int, limit *int, statuses []string, baseStatuses []string, variant *string, taskName *string, displayTasksOnly *bool) int
 		Project                 func(childComplexity int, projectID string) int
 		Projects                func(childComplexity int) int
 		SpruceConfig            func(childComplexity int) int
@@ -813,12 +813,12 @@ type QueryResolver interface {
 	Patch(ctx context.Context, id string) (*model.APIPatch, error)
 	Projects(ctx context.Context) (*Projects, error)
 	Project(ctx context.Context, projectID string) (*model.APIProjectRef, error)
-	PatchTasks(ctx context.Context, patchID string, sortBy *TaskSortCategory, sortDir *SortDirection, page *int, limit *int, statuses []string, baseStatuses []string, variant *string, taskName *string) (*PatchTasks, error)
+	PatchTasks(ctx context.Context, patchID string, sortBy *TaskSortCategory, sortDir *SortDirection, page *int, limit *int, statuses []string, baseStatuses []string, variant *string, taskName *string, displayTasksOnly *bool) (*PatchTasks, error)
 	TaskTests(ctx context.Context, taskID string, execution *int, sortCategory *TestSortCategory, sortDirection *SortDirection, page *int, limit *int, testName *string, statuses []string) (*TaskTestResult, error)
 	TaskFiles(ctx context.Context, taskID string, execution *int) (*TaskFiles, error)
 	User(ctx context.Context, userID *string) (*model.APIDBUser, error)
 	TaskLogs(ctx context.Context, taskID string) (*RecentTaskLogs, error)
-	PatchBuildVariants(ctx context.Context, patchID string) ([]*PatchBuildVariant, error)
+	PatchBuildVariants(ctx context.Context, patchID string, displayTasksOnly *bool) ([]*PatchBuildVariant, error)
 	CommitQueue(ctx context.Context, id string) (*model.APICommitQueue, error)
 	UserSettings(ctx context.Context) (*model.APIUserSettings, error)
 	SpruceConfig(ctx context.Context) (*model.APIAdminSettings, error)
@@ -2940,7 +2940,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.PatchBuildVariants(childComplexity, args["patchId"].(string)), true
+		return e.complexity.Query.PatchBuildVariants(childComplexity, args["patchId"].(string), args["displayTasksOnly"].(*bool)), true
 
 	case "Query.patchTasks":
 		if e.complexity.Query.PatchTasks == nil {
@@ -2952,7 +2952,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.PatchTasks(childComplexity, args["patchId"].(string), args["sortBy"].(*TaskSortCategory), args["sortDir"].(*SortDirection), args["page"].(*int), args["limit"].(*int), args["statuses"].([]string), args["baseStatuses"].([]string), args["variant"].(*string), args["taskName"].(*string)), true
+		return e.complexity.Query.PatchTasks(childComplexity, args["patchId"].(string), args["sortBy"].(*TaskSortCategory), args["sortDir"].(*SortDirection), args["page"].(*int), args["limit"].(*int), args["statuses"].([]string), args["baseStatuses"].([]string), args["variant"].(*string), args["taskName"].(*string), args["displayTasksOnly"].(*bool)), true
 
 	case "Query.project":
 		if e.complexity.Query.Project == nil {
@@ -4424,6 +4424,7 @@ var sources = []*ast.Source{
     baseStatuses: [String!] = []
     variant: String
     taskName: String
+    displayTasksOnly: Boolean = false
   ): PatchTasks!
   taskTests(
     taskId: String!
@@ -4438,7 +4439,7 @@ var sources = []*ast.Source{
   taskFiles(taskId: String!, execution: Int): TaskFiles!
   user(userId: String): User!
   taskLogs(taskId: String!): RecentTaskLogs!
-  patchBuildVariants(patchId: String!): [PatchBuildVariant!]!
+  patchBuildVariants(patchId: String!, displayTasksOnly: Boolean = false): [PatchBuildVariant!]!
   commitQueue(id: String!): CommitQueue!
   userSettings: UserSettings
   spruceConfig: SpruceConfig
@@ -6203,6 +6204,14 @@ func (ec *executionContext) field_Query_patchBuildVariants_args(ctx context.Cont
 		}
 	}
 	args["patchId"] = arg0
+	var arg1 *bool
+	if tmp, ok := rawArgs["displayTasksOnly"]; ok {
+		arg1, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["displayTasksOnly"] = arg1
 	return args, nil
 }
 
@@ -6281,6 +6290,14 @@ func (ec *executionContext) field_Query_patchTasks_args(ctx context.Context, raw
 		}
 	}
 	args["taskName"] = arg8
+	var arg9 *bool
+	if tmp, ok := rawArgs["displayTasksOnly"]; ok {
+		arg9, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["displayTasksOnly"] = arg9
 	return args, nil
 }
 
@@ -15084,7 +15101,7 @@ func (ec *executionContext) _Query_patchTasks(ctx context.Context, field graphql
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().PatchTasks(rctx, args["patchId"].(string), args["sortBy"].(*TaskSortCategory), args["sortDir"].(*SortDirection), args["page"].(*int), args["limit"].(*int), args["statuses"].([]string), args["baseStatuses"].([]string), args["variant"].(*string), args["taskName"].(*string))
+		return ec.resolvers.Query().PatchTasks(rctx, args["patchId"].(string), args["sortBy"].(*TaskSortCategory), args["sortDir"].(*SortDirection), args["page"].(*int), args["limit"].(*int), args["statuses"].([]string), args["baseStatuses"].([]string), args["variant"].(*string), args["taskName"].(*string), args["displayTasksOnly"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -15289,7 +15306,7 @@ func (ec *executionContext) _Query_patchBuildVariants(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().PatchBuildVariants(rctx, args["patchId"].(string))
+		return ec.resolvers.Query().PatchBuildVariants(rctx, args["patchId"].(string), args["displayTasksOnly"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

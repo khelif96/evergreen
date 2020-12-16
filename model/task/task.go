@@ -2597,7 +2597,7 @@ func getBsonFailureStatuses() bson.A {
 
 // GetTasksByVersion gets all tasks for a specific version
 // Query results can be filtered by task name, variant name and status in addition to being paginated and limited
-func GetTasksByVersion(versionID, sortBy string, statuses []string, variant string, taskName string, sortDir, page, limit int, fieldsToProject []string) ([]Task, int, error) {
+func GetTasksByVersion(versionID, sortBy string, statuses []string, variant string, taskName string, sortDir, page, limit int, fieldsToProject []string, excludeExecutionTasks bool) ([]Task, int, error) {
 	match := bson.M{
 		VersionKey: versionID,
 	}
@@ -2612,6 +2612,15 @@ func GetTasksByVersion(versionID, sortBy string, statuses []string, variant stri
 		{"$match": match},
 		addDisplayStatus,
 	}
+
+	if excludeExecutionTasks {
+		pipeline = append(pipeline, bson.M{
+			"$match": bson.M{
+				DisplayOnlyKey: excludeExecutionTasks,
+			},
+		})
+	}
+
 	if len(statuses) > 0 {
 		pipeline = append(pipeline, bson.M{
 			"$match": bson.M{
