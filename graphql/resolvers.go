@@ -2384,20 +2384,26 @@ func (r *taskResolver) GeneratedByName(ctx context.Context, obj *restModel.APITa
 	return &name, nil
 }
 
+// IsPerfPluginEnabled returns true if
+// the perf plugin is enabled for a project
+// the task is not running
+// cedar has performance data for the task
 func (r *taskResolver) IsPerfPluginEnabled(ctx context.Context, obj *restModel.APITask) (bool, error) {
 	var perfPlugin *plugin.PerfPlugin
 	pRef, err := r.sc.FindProjectById(*obj.ProjectId, false)
 	if err != nil {
 		return false, err
 	}
-	if perfPluginSettings, exists := evergreen.GetEnvironment().Settings().Plugins[perfPlugin.Name()]; exists {
-		err := mapstructure.Decode(perfPluginSettings, &perfPlugin)
-		if err != nil {
-			return false, err
-		}
-		for _, projectName := range perfPlugin.Projects {
-			if projectName == pRef.Id || projectName == pRef.Identifier {
-				return true, nil
+	if *obj.Status != evergreen.TaskStarted {
+		if perfPluginSettings, exists := evergreen.GetEnvironment().Settings().Plugins[perfPlugin.Name()]; exists {
+			err := mapstructure.Decode(perfPluginSettings, &perfPlugin)
+			if err != nil {
+				return false, err
+			}
+			for _, projectName := range perfPlugin.Projects {
+				if projectName == pRef.Id || projectName == pRef.Identifier {
+					return true, nil
+				}
 			}
 		}
 	}
