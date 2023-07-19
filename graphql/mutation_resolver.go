@@ -48,7 +48,7 @@ func (r *mutationResolver) BbCreateTicket(ctx context.Context, taskID string, ex
 	return true, nil
 }
 
-// AddAnnotationIssue is the resolver for the addAnnotationIssue field.
+// some AddAnnotationIssue is the resolver for the addAnnotationIssue field.
 func (r *mutationResolver) AddAnnotationIssue(ctx context.Context, taskID string, execution int, apiIssue restModel.APIIssueLink, isIssue bool) (bool, error) {
 	usr := mustHaveUser(ctx)
 	issue := restModel.APIIssueLinkToService(apiIssue)
