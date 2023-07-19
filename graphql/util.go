@@ -1,5 +1,6 @@
 package graphql
 
+// THings to test:
 import (
 	"context"
 	"fmt"
