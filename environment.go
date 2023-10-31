@@ -31,6 +31,7 @@ import (
 	"github.com/mongodb/grip/send"
 	"github.com/mongodb/jasper"
 	"github.com/pkg/errors"
+	"github.com/sashabaranov/go-openai"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -98,6 +99,8 @@ type Environment interface {
 	Session() db.Session
 	Client() *mongo.Client
 	DB() *mongo.Database
+
+	OpenAIClient() *openai.Client
 
 	// The Environment provides access to several amboy queues for
 	// processing background work in the context of the Evergreen
@@ -219,6 +222,8 @@ func NewEnvironment(ctx context.Context, confPath string, db *DBSettings) (Envir
 		catcher.Add(e.initDB(ctx, e.settings.Database))
 	}
 
+	e.openAIClient = e.initOpenAIClient()
+
 	catcher.Add(e.initJasper())
 	catcher.Add(e.initDepot(ctx))
 	catcher.Add(e.initSenders(ctx))
@@ -256,6 +261,7 @@ type envState struct {
 	userManager             gimlet.UserManager
 	userManagerInfo         UserManagerInfo
 	shutdownSequenceStarted bool
+	openAIClient            *openai.Client
 }
 
 // UserManagerInfo lists properties of the UserManager regarding its support for
@@ -413,6 +419,13 @@ func (e *envState) Context() (context.Context, context.CancelFunc) {
 	return context.WithCancel(e.ctx)
 }
 
+func (e *envState) initOpenAIClient() *openai.Client {
+	return openai.NewClient(e.settings.Ui.OpenAIKey)
+}
+
+func (e *envState) OpenAIClient() *openai.Client {
+	return e.openAIClient
+}
 func (e *envState) SetShutdown() {
 	e.mu.Lock()
 	defer e.mu.Unlock()

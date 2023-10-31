@@ -704,6 +704,16 @@ type ComplexityRoot struct {
 		Value func(childComplexity int) int
 	}
 
+	ParsleyAIMessage struct {
+		Content func(childComplexity int) int
+		Role    func(childComplexity int) int
+	}
+
+	ParsleyAIResponse struct {
+		Answer     func(childComplexity int) int
+		Confidence func(childComplexity int) int
+	}
+
 	ParsleyFilter struct {
 		CaseSensitive func(childComplexity int) int
 		ExactMatch    func(childComplexity int) int
@@ -959,6 +969,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		AskParsleyAi             func(childComplexity int, messageInput ParsleyAIInput) int
 		AwsRegions               func(childComplexity int) int
 		BbGetCreatedTickets      func(childComplexity int, taskID string) int
 		BuildBaron               func(childComplexity int, taskID string, execution int) int
@@ -1752,6 +1763,7 @@ type QueryResolver interface {
 	TaskNamesForBuildVariant(ctx context.Context, projectIdentifier string, buildVariant string) ([]string, error)
 	HasVersion(ctx context.Context, id string) (bool, error)
 	Version(ctx context.Context, id string) (*model.APIVersion, error)
+	AskParsleyAi(ctx context.Context, messageInput ParsleyAIInput) ([]*ParsleyAIMessage, error)
 }
 type RepoSettingsResolver interface {
 	Aliases(ctx context.Context, obj *model.APIProjectSettings) ([]*model.APIProjectAlias, error)
@@ -4906,6 +4918,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Parameter.Value(childComplexity), true
 
+	case "ParsleyAIMessage.content":
+		if e.complexity.ParsleyAIMessage.Content == nil {
+			break
+		}
+
+		return e.complexity.ParsleyAIMessage.Content(childComplexity), true
+
+	case "ParsleyAIMessage.role":
+		if e.complexity.ParsleyAIMessage.Role == nil {
+			break
+		}
+
+		return e.complexity.ParsleyAIMessage.Role(childComplexity), true
+
+	case "ParsleyAIResponse.answer":
+		if e.complexity.ParsleyAIResponse.Answer == nil {
+			break
+		}
+
+		return e.complexity.ParsleyAIResponse.Answer(childComplexity), true
+
+	case "ParsleyAIResponse.confidence":
+		if e.complexity.ParsleyAIResponse.Confidence == nil {
+			break
+		}
+
+		return e.complexity.ParsleyAIResponse.Confidence(childComplexity), true
+
 	case "ParsleyFilter.caseSensitive":
 		if e.complexity.ParsleyFilter.CaseSensitive == nil {
 			break
@@ -6173,6 +6213,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PublicKey.Name(childComplexity), true
+
+	case "Query.askParsleyAI":
+		if e.complexity.Query.AskParsleyAi == nil {
+			break
+		}
+
+		args, err := ec.field_Query_askParsleyAI_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.AskParsleyAi(childComplexity, args["messageInput"].(ParsleyAIInput)), true
 
 	case "Query.awsRegions":
 		if e.complexity.Query.AwsRegions == nil {
@@ -9304,6 +9356,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputMoveProjectInput,
 		ec.unmarshalInputNotificationsInput,
 		ec.unmarshalInputParameterInput,
+		ec.unmarshalInputParsleyAIInput,
+		ec.unmarshalInputParsleyAIMessageInput,
 		ec.unmarshalInputParsleyFilterInput,
 		ec.unmarshalInputPatchConfigure,
 		ec.unmarshalInputPatchTriggerAliasInput,
@@ -10980,6 +11034,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_askParsleyAI_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 ParsleyAIInput
+	if tmp, ok := rawArgs["messageInput"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("messageInput"))
+		arg0, err = ec.unmarshalNParsleyAIInput2githubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐParsleyAIInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["messageInput"] = arg0
 	return args, nil
 }
 
@@ -32389,6 +32458,182 @@ func (ec *executionContext) fieldContext_Parameter_value(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _ParsleyAIMessage_role(ctx context.Context, field graphql.CollectedField, obj *ParsleyAIMessage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ParsleyAIMessage_role(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Role, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ParsleyAIMessage_role(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ParsleyAIMessage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ParsleyAIMessage_content(ctx context.Context, field graphql.CollectedField, obj *ParsleyAIMessage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ParsleyAIMessage_content(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Content, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ParsleyAIMessage_content(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ParsleyAIMessage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ParsleyAIResponse_answer(ctx context.Context, field graphql.CollectedField, obj *ParsleyAIResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ParsleyAIResponse_answer(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Answer, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ParsleyAIResponse_answer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ParsleyAIResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ParsleyAIResponse_confidence(ctx context.Context, field graphql.CollectedField, obj *ParsleyAIResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ParsleyAIResponse_confidence(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Confidence, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ParsleyAIResponse_confidence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ParsleyAIResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ParsleyFilter_expression(ctx context.Context, field graphql.CollectedField, obj *model.APIParsleyFilter) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ParsleyFilter_expression(ctx, field)
 	if err != nil {
@@ -44446,6 +44691,67 @@ func (ec *executionContext) fieldContext_Query_version(ctx context.Context, fiel
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_version_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_askParsleyAI(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_askParsleyAI(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().AskParsleyAi(rctx, fc.Args["messageInput"].(ParsleyAIInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*ParsleyAIMessage)
+	fc.Result = res
+	return ec.marshalNParsleyAIMessage2ᚕᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐParsleyAIMessage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_askParsleyAI(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "role":
+				return ec.fieldContext_ParsleyAIMessage_role(ctx, field)
+			case "content":
+				return ec.fieldContext_ParsleyAIMessage_content(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ParsleyAIMessage", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_askParsleyAI_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -66866,6 +67172,73 @@ func (ec *executionContext) unmarshalInputParameterInput(ctx context.Context, ob
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputParsleyAIInput(ctx context.Context, obj interface{}) (ParsleyAIInput, error) {
+	var it ParsleyAIInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"messages"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "messages":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("messages"))
+			data, err := ec.unmarshalNParsleyAIMessageInput2ᚕᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐParsleyAIMessageInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Messages = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputParsleyAIMessageInput(ctx context.Context, obj interface{}) (ParsleyAIMessageInput, error) {
+	var it ParsleyAIMessageInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"role", "content"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "role":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Role = data
+		case "content":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Content = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputParsleyFilterInput(ctx context.Context, obj interface{}) (model.APIParsleyFilter, error) {
 	var it model.APIParsleyFilter
 	asMap := map[string]interface{}{}
@@ -75089,6 +75462,94 @@ func (ec *executionContext) _Parameter(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var parsleyAIMessageImplementors = []string{"ParsleyAIMessage"}
+
+func (ec *executionContext) _ParsleyAIMessage(ctx context.Context, sel ast.SelectionSet, obj *ParsleyAIMessage) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, parsleyAIMessageImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ParsleyAIMessage")
+		case "role":
+			out.Values[i] = ec._ParsleyAIMessage_role(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "content":
+			out.Values[i] = ec._ParsleyAIMessage_content(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var parsleyAIResponseImplementors = []string{"ParsleyAIResponse"}
+
+func (ec *executionContext) _ParsleyAIResponse(ctx context.Context, sel ast.SelectionSet, obj *ParsleyAIResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, parsleyAIResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ParsleyAIResponse")
+		case "answer":
+			out.Values[i] = ec._ParsleyAIResponse_answer(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "confidence":
+			out.Values[i] = ec._ParsleyAIResponse_confidence(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var parsleyFilterImplementors = []string{"ParsleyFilter"}
 
 func (ec *executionContext) _ParsleyFilter(ctx context.Context, sel ast.SelectionSet, obj *model.APIParsleyFilter) graphql.Marshaler {
@@ -78458,6 +78919,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_version(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "askParsleyAI":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_askParsleyAI(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -86350,6 +86833,71 @@ func (ec *executionContext) unmarshalNParameterInput2ᚖgithubᚗcomᚋevergreen
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNParsleyAIInput2githubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐParsleyAIInput(ctx context.Context, v interface{}) (ParsleyAIInput, error) {
+	res, err := ec.unmarshalInputParsleyAIInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNParsleyAIMessage2ᚕᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐParsleyAIMessage(ctx context.Context, sel ast.SelectionSet, v []*ParsleyAIMessage) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOParsleyAIMessage2ᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐParsleyAIMessage(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNParsleyAIMessageInput2ᚕᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐParsleyAIMessageInputᚄ(ctx context.Context, v interface{}) ([]*ParsleyAIMessageInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*ParsleyAIMessageInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNParsleyAIMessageInput2ᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐParsleyAIMessageInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNParsleyAIMessageInput2ᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐParsleyAIMessageInput(ctx context.Context, v interface{}) (*ParsleyAIMessageInput, error) {
+	res, err := ec.unmarshalInputParsleyAIMessageInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNParsleyFilter2githubᚗcomᚋevergreenᚑciᚋevergreenᚋrestᚋmodelᚐAPIParsleyFilter(ctx context.Context, sel ast.SelectionSet, v model.APIParsleyFilter) graphql.Marshaler {
 	return ec._ParsleyFilter(ctx, sel, &v)
 }
@@ -89941,6 +90489,13 @@ func (ec *executionContext) unmarshalOParameterInput2ᚖgithubᚗcomᚋevergreen
 	}
 	res, err := ec.unmarshalInputParameterInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOParsleyAIMessage2ᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐParsleyAIMessage(ctx context.Context, sel ast.SelectionSet, v *ParsleyAIMessage) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ParsleyAIMessage(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOParsleyFilter2ᚕgithubᚗcomᚋevergreenᚑciᚋevergreenᚋrestᚋmodelᚐAPIParsleyFilterᚄ(ctx context.Context, sel ast.SelectionSet, v []model.APIParsleyFilter) graphql.Marshaler {

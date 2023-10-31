@@ -30,6 +30,7 @@ import (
 	"github.com/mongodb/grip"
 	"github.com/mongodb/grip/message"
 	werrors "github.com/pkg/errors"
+	"github.com/sashabaranov/go-openai"
 )
 
 // BbGetCreatedTickets is the resolver for the bbGetCreatedTickets field.
@@ -994,6 +995,50 @@ func (r *queryResolver) Version(ctx context.Context, id string) (*restModel.APIV
 	apiVersion := restModel.APIVersion{}
 	apiVersion.BuildFromService(*v)
 	return &apiVersion, nil
+}
+
+// AskParsleyAi is the resolver for the askParsleyAI field.
+func (r *queryResolver) AskParsleyAi(ctx context.Context, messageInput ParsleyAIInput) ([]*ParsleyAIMessage, error) {
+
+	env := evergreen.GetEnvironment()
+	openAIClient := env.OpenAIClient()
+	if openAIClient == nil {
+		return nil, InternalServerError.Send(ctx, "OpenAI client not initialized")
+	}
+
+	messages := []openai.ChatCompletionMessage{}
+
+	for _, message := range messageInput.Messages {
+		validRoles := []string{openai.ChatMessageRoleSystem, openai.ChatMessageRoleUser, openai.ChatMessageRoleAssistant}
+		if !utility.StringSliceContains(validRoles, message.Role) {
+			return nil, InternalServerError.Send(ctx, fmt.Sprintf("Invalid role '%s' for message '%s'", message.Role, message.Content))
+		}
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    message.Role,
+			Content: message.Content,
+		})
+	}
+
+	resp, err := openAIClient.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model:       openai.GPT432K,
+			Messages:    messages,
+			Temperature: 0.2,
+		},
+	)
+	if err != nil {
+		return nil, InternalServerError.Send(ctx, err.Error())
+	}
+	response := []*ParsleyAIMessage{}
+	for _, choice := range resp.Choices {
+		response = append(response, &ParsleyAIMessage{
+			Role:    choice.Message.Role,
+			Content: choice.Message.Content,
+		})
+	}
+
+	return response, nil
 }
 
 // Query returns QueryResolver implementation.

@@ -26,6 +26,8 @@ type UIConfig struct {
 	FileStreamingContentTypes []string `bson:"file_streaming_content_types" json:"file_streaming_content_types" yaml:"file_streaming_content_types"` // allowed content types for the file streaming route.
 	LoginDomain               string   `bson:"login_domain" json:"login_domain" yaml:"login_domain"`                                                 // domain for the login cookie (defaults to domain of app)
 	UserVoice                 string   `bson:"userVoice" json:"userVoice" yaml:"userVoice"`
+	OpenAIKey                 string   `bson:"openai_key" json:"openai_key" yaml:"openai_key"`
+	OpenAIOrganizationId      string   `bson:"openai_organization_id" json:"openai_organization_id" yaml:"openai_organization_id"`
 }
 
 func (c *UIConfig) SectionId() string { return "ui" }
@@ -62,6 +64,8 @@ func (c *UIConfig) Set(ctx context.Context) error {
 			"file_streaming_content_types": c.FileStreamingContentTypes,
 			"login_domain":                 c.LoginDomain,
 			"userVoice":                    c.UserVoice,
+			"openai_key":                   c.OpenAIKey,
+			"openai_organization_id":       c.OpenAIOrganizationId,
 		},
 	}, options.Update().SetUpsert(true))
 

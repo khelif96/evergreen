@@ -220,3 +220,5 @@ require (
 	github.com/shirou/gopsutil/v3 v3.23.9
 	gopkg.in/yaml.v3 v3.0.1
 )
+
+require github.com/sashabaranov/go-openai v1.16.0

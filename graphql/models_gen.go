@@ -202,6 +202,25 @@ type NewDistroPayload struct {
 	NewDistroID string `json:"newDistroId"`
 }
 
+type ParsleyAIInput struct {
+	Messages []*ParsleyAIMessageInput `json:"messages"`
+}
+
+type ParsleyAIMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type ParsleyAIMessageInput struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type ParsleyAIResponse struct {
+	Answer     string  `json:"answer"`
+	Confidence float64 `json:"confidence"`
+}
+
 // PatchConfigure is the input to the schedulePatch mutation.
 // It contains information about how a user has configured their patch (e.g. name, tasks to run, etc).
 type PatchConfigure struct {

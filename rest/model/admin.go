@@ -2395,6 +2395,8 @@ type APIUIConfig struct {
 	FileStreamingContentTypes []string `json:"file_streaming_content_types"`
 	LoginDomain               *string  `json:"login_domain"`
 	UserVoice                 *string  `json:"userVoice"`
+	OpenAIKey                 *string  `json:"openai_key"`
+	OpenAIOrganizationID      *string  `json:"openai_organization_id"`
 }
 
 func (a *APIUIConfig) BuildFromService(h interface{}) error {
@@ -2413,6 +2415,8 @@ func (a *APIUIConfig) BuildFromService(h interface{}) error {
 		a.LoginDomain = utility.ToStringPtr(v.LoginDomain)
 		a.UserVoice = utility.ToStringPtr(v.UserVoice)
 		a.FileStreamingContentTypes = v.FileStreamingContentTypes
+		a.OpenAIKey = utility.ToStringPtr(v.OpenAIKey)
+		a.OpenAIOrganizationID = utility.ToStringPtr(v.OpenAIOrganizationId)
 	default:
 		return errors.Errorf("programmatic error: expected UI config but got type %T", h)
 	}
@@ -2434,6 +2438,8 @@ func (a *APIUIConfig) ToService() (interface{}, error) {
 		FileStreamingContentTypes: a.FileStreamingContentTypes,
 		LoginDomain:               utility.FromStringPtr(a.LoginDomain),
 		UserVoice:                 utility.FromStringPtr(a.UserVoice),
+		OpenAIKey:                 utility.FromStringPtr(a.OpenAIKey),
+		OpenAIOrganizationId:      utility.FromStringPtr(a.OpenAIOrganizationID),
 	}, nil
 }
 

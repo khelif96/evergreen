@@ -96,4 +96,26 @@ type Query {
   # version
   hasVersion(id: String!): Boolean!
   version(id: String!): Version!
+
+  # ParsleyAI
+  askParsleyAI(messageInput: ParsleyAIInput!): [ParsleyAIMessage]!
+}
+
+type ParsleyAIResponse {
+  answer: String!
+  confidence: Float!
+}
+
+input ParsleyAIMessageInput {
+  role: String!
+  content: String!
+}
+
+type ParsleyAIMessage {
+  role: String!
+  content: String!
+}
+
+input ParsleyAIInput {
+  messages: [ParsleyAIMessageInput!]!
 }
